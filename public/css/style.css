@@ -1,0 +1,57 @@
+body, html {
+  color: #ffffff;
+  background-color: #ffffff;
+}
+
+#side{
+    width:30%;
+    float:left;
+}
+
+#main_typing{
+    width: 70%;
+  background-image: url("../images/backGround.png"); /* 全体の背景画像 */
+  background-repeat: no-repeat;            /* 背景を繰り返さない */
+  background-position: 50% 50%;            /* 背景画像の位置は画面中央 */
+  background-attachment:fixed;             /* 背景画像を固定する */
+}
+
+#main_typing .share{
+  background-color: #666;
+  color: #fff;
+  width: 100%;
+  height: 100px;
+}
+
+#nicoscreen{
+  background-color:rgba( 0, 0, 0, 0.7);
+  color: #fff;
+  width: 100%;
+  height: 450px;
+  font-size: 18pt;
+  overflow: auto;
+  text-align: center;
+}
+#nicoscreen .test{
+  color: #7fff00;
+}
+#nicoscreen a{
+  color: #fff;
+}
+
+#missType{
+  color: #ddd;
+  font-size: 13pt;
+}
+
+.question{
+  background-color:rgba( 100, 100, 100, 0.7);
+  color: #fff;
+  width: 100%;
+  height: 15%;
+  font-size: 18pt;
+  overflow: auto;
+  text-align: center;
+  padding-top:10px;
+  margin:25px 0px 15px 0px;
+}
