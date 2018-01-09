@@ -1,5 +1,7 @@
 $(function(){
-	$question = $('#Question');
+	var $Question = $('#Question'),
+		$hiragana = $('.hiragana'),
+		$kana = $('.kana');
 
 	var typing = {
 		//文字を格納する配列
@@ -33,15 +35,22 @@ $(function(){
 		},
 		rnd: [],//グローバル変数群
 		question: [],//問題の文字列を格納
-		cnt: 0,//何問目か格納
+		tCnt: 0,//何文字目か
+		qCnt: 0,//何問目か
 		typStart: '',
 		typEnd: '',	 //開始時と終了時の時刻を格納
+		hiraganaText: '',
 		questionText: '',
+		questionBox: [
+			'あああああ',
+			'あいうえお',
+			'かきくけこ',
+		],
 		init: function(){
 			typing.eventSet();
 		},
 		eventSet: function(){
-			document.onkeydown = typing.typeGame;	//キー押下時に関数typeGame()を呼び出す
+			document.onkeydown = typing.typeGame;//キー押下時
 			typing.gameSet();
 		},
 		//0～25までの乱数を200個作成して配列typing.rndに格納する関数
@@ -55,13 +64,19 @@ $(function(){
 		//タイピングゲームの問題をセットする関数
 		gameSet: function()
 		{
+			if(typing.qCnt >= typing.questionBox.length){
+				$Question.html('END');
+				return;	
+			}
+
 			//問題文とカウント数をクリアする
 			typing.question = [];
-			typing.cnt = 0;
+			typing.tCnt = 0;
 			typing.questionText = '';
 			
-			typing.questionText = 'あいうえお';
-			var splitText = typing.hiraToRoman('あいうえお').toUpperCase().split('');
+			typing.questionText = typing.questionBox[typing.qCnt];
+			typing.hiraganaText = typing.hiraToRoman(typing.questionText);
+			var splitText = typing.hiraganaText.toUpperCase().split('');
 
 			for ( var i = 0 ; i < splitText.length ; i++)
 			{
@@ -69,7 +84,8 @@ $(function(){
 			}
 			
 			//問題枠に表示する
-			$question.html(typing.questionText);
+			$hiragana.html(typing.questionText);
+			$kana.html(typing.hiraganaText);
 		},
 		//キー入力を受け取る関数
 		typeGame: function(evt)
@@ -83,44 +99,45 @@ $(function(){
 				kc = evt.which;
 			}
 
-			//入力されたキーコードと、問題文のキーコードを比較
-			if (kc == typing.question[typing.cnt]){
-				//以下、キーコードが一致した時の処理
+			if (kc == typing.question[typing.tCnt]){
 
-				//最初の1文字が入力された時間を記録する
-				if (typing.cnt==0)
+				typing.tCnt++; //文字数を+1
+ 
+	  	  	  	//最初の1文字が入力された時間を記録する
+				if (typing.tCnt == 0)
 				{ 
 					typing.typStart = new Date();
 				}
 				
-				typing.cnt++; //カウント数を＋１にする
-				
 				//全文字入力したか確認
-				if ( typing.cnt < typing.question.length)
+				if (typing.tCnt < typing.question.length)
 				{
 					//問題文の頭の一文字を切り取る
-					typing.questionText = typing.questionText.substring(1, typing.questionText.Length);
+					typing.hiraganaText = typing.hiraganaText.substring(1, typing.hiraganaText.Length);
 
-					//問題枠に表示する
-					$question.html(typing.questionText);
+					$kana.html(typing.hiraganaText);
 				}else{
-					//全文字入力していたら、終了時間を記録する
-					typing.typEnd = new Date();
+					typing.qCnt++; //カウント数を+1
+
+					// //全文字入力していたら、終了時間を記録する
+					// typing.typEnd = new Date();
 					
-					//終了時間－開始時間で掛かったミリ秒を取得する
-					var keika = typing.typEnd - typing.typStart;
+					// //終了時間－開始時間で掛かったミリ秒を取得する
+					// var keika = typing.typEnd - typing.typStart;
 					
-					//1000で割って「切捨て」、秒数を取得
-					var sec = Math.floor( keika/1000 );
+					// //1000で割って「切捨て」、秒数を取得
+					// var sec = Math.floor( keika/1000 );
 					
-					//1000で割った「余り(%で取得できる）」でミリ秒を取得
-					var msec = keika % 1000;
+					// //1000で割った「余り(%で取得できる）」でミリ秒を取得
+					// var msec = keika % 1000;
 					
-					//問題終了を告げる文字列を作成
-					var fin="GAME終了　時間："+sec+"秒"+msec;
+					// //問題終了を告げる文字列を作成
+					// var fin="GAME終了　時間："+sec+"秒"+msec;
 					
-					//問題枠にゲーム終了を表示
-					$question.html(fin);
+					// //問題枠にゲーム終了を表示
+					// $hiragana.html(fin);
+
+					typing.gameSet();
 				}
 			}
 		},
