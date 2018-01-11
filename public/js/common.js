@@ -52,6 +52,47 @@ $(function(){
 				typing.rnd[i] = Math.floor( Math.random() * 26 );
 			}
 		},
+		chat: function(){
+			socket.on('connected', function () {
+	            socket.emit('check credential', battleData);
+	        });
+
+	        // 認証成功
+	        socket.on('credential ok', function (data) {
+	            battleData.roomId = data.roomId;
+	        });
+
+	        // ルームに同名ユーザー存在 再度生成
+	        socket.on('userName exists', function () {
+	            battleData.userName = 'user' + Math.floor(Math.random() * 100);
+	            socket.emit('check credential', battleData);
+	        });
+
+	        socket.on('battle wait', function () {
+	            battleCtrl.battleWait();
+	        });
+
+	        socket.on('battle start', function () {
+	            battleCtrl.battleStart();
+	        });
+
+	        socket.on('battle judge', function (data) {
+	            battleCtrl.judge(data);
+	        });
+
+	        socket.on('battle timeout', function (result) {
+	            battleCtrl.battleResult(result);
+	        });
+
+	        socket.on('update members', function (members) {
+	            battleCtrl.membersSet(members);
+	        });
+
+	        socket.on('getStatus', function () {
+	            battleData.enemyCommend = true;
+	            battleCtrl.enemySet();
+	        });
+		},
 		//タイピングゲームの問題をセットする関数
 		gameSet: function()
 		{

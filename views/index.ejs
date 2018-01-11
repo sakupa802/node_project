@@ -1,14 +1,50 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/css/style.css' />
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
-    <script src='/js/common.js'></script>
-  </head>
-    <!-- <h1><%= title %></h1>
-    <p><%= title %></p> -->
+	<head>
+	<title><%= title %></title>
+	<link rel='stylesheet' href='/css/style.css' />
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.0/jquery.min.js"></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<!-- <script src='/js/common.js'></script> -->
+	<script>
+		$(function(){
+			$('.join').on('click', function(){
+				roomJoin();
+			});
+
+			function roomJoin(){
+				const socket = io();
+				var roomid = '',
+					userName = '';
+
+				socket.on('connected', function() {
+					
+					//ルーム確認
+					socket.emit('join room', {});
+
+					// ルームに同名ユーザー存在 再度生成
+					socket.on('userName exists', function () {
+						//userName = 'user' + Math.floor(Math.random() * 100);
+						socket.emit('join room', {});
+					});
+
+					socket.on('battle wait', function () {
+						$('.startWait').text('対戦相手を探しています');
+						$('.startWait').fadeIn();
+					});
+
+					socket.on('battle start', function () {
+						$('.startWait').text('対戦相手が見つかりました');
+						$('.startWait').fadeIn();
+					});
+				});
+			}
+		});
+	</script>
+	</head>
 	<body>
-		<div id="Question"></div>
+		<p class="join">room join</p>
+		<p style="display:none" class="startWait"></p>
+		<!-- <div id="Question"></div> -->
 	</body>
 </html>
