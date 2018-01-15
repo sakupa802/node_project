@@ -45,8 +45,10 @@ http.listen(3000, function(){
   console.log('listening on *:3000');
 });
 
+
 /*------ sockets ------*/
-var joinCount = 0,// 参加人数
+var userName = '',
+	joinCount = 0,// 参加人数
     roomCount = 1;// ルーム数
 
 // socket.ioのソケットを管理するオブジェクト
@@ -56,10 +58,14 @@ var room = io.sockets.on('connection', function (socket) {
 	// コネクションが確立されたら実行
 	socket.emit('connected', {});
 
+	// ユーザー名返却
+	socket.on('get userName', function (client) {
+		userName = uuid.v4();
+		socket.emit('return userName', {'userName':userName});
+	});
+
 	// 認証情報を確認する
 	socket.on('join room', function (client) {
-		
-		var userName = uuid.v4();
 
 	    joinCount += 1;
 	    if (joinCount > 2) {
@@ -69,13 +75,13 @@ var room = io.sockets.on('connection', function (socket) {
 	    } else {
 	        roomId = 'roomId' + roomCount;
 	    }
-		
+
 		// なければルーム生成
 	    if (socketsOf[roomId] === undefined) {
 	        socketsOf[roomId] = {};
 	    }else{
 	    	// ルームに同名ユーザー存在 再度生成
-            if (socketsOf[roomId][userName] !== undefined) {
+            if (socketsOf[roomId][client.userName] !== undefined) {
                 joinCount -= 1;
                 socket.emit('userName exists', {});
                 return;
@@ -83,15 +89,15 @@ var room = io.sockets.on('connection', function (socket) {
         }
 
 	    // ソケットにクライアントの情報をセット
-		socketsOf[roomId][userName] = socket;
+		socketsOf[roomId][client.userName] = 1;
 
+		console.log(socketsOf);
 	    // 認証成功
 	    // socket.emit('join ok', {});
 
 	    // 既存クライアントにメンバーの変更を通知
 	    var members = Object.keys(socketsOf[roomId]);
 	    //emitToRoom(client.roomId, 'update members', members);
-	    console.log(members);
 
 	    if (members.length === 1) {
 	        socket.emit('battle wait');
