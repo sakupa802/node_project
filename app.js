@@ -48,6 +48,7 @@ http.listen(3000, function(){
 
 /*------ sockets ------*/
 var userName = '',
+	enemyName = '',
 	joinCount = 0,// 参加人数
     roomCount = 1;// ルーム数
 
@@ -57,12 +58,6 @@ var socketsOf = {};
 var room = io.sockets.on('connection', function (socket) {
 	// コネクションが確立されたら実行
 	socket.emit('connected', {});
-
-	// ユーザー名返却
-	socket.on('get userName', function (client) {
-		userName = uuid.v4();
-		socket.emit('return userName', {'userName':userName});
-	});
 
 	// 認証情報を確認する
 	socket.on('join room', function (client) {
@@ -89,7 +84,7 @@ var room = io.sockets.on('connection', function (socket) {
         }
 
 	    // ソケットにクライアントの情報をセット
-		socketsOf[roomId][client.userName] = 1;
+		socketsOf[roomId][client.userName] = this.id;
 
 		console.log(socketsOf);
 	    // 認証成功
@@ -102,9 +97,13 @@ var room = io.sockets.on('connection', function (socket) {
 	    if (members.length === 1) {
 	        socket.emit('battle wait');
 	    }else if(members.length === 2) {
-	        socket.broadcast.emit('battle start');
-	        socket.emit('battle start');
+	        socket.broadcast.emit('battle start', members);
+	        socket.emit('battle start', members);
 	    }
+
+	    socket.on('clear type', function(data){
+	    	socket.to(data).emit('clear text');
+	    });
 	});
 });
 

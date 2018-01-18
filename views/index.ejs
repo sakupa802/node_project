@@ -11,32 +11,33 @@
 			var $Question = $('#Question'),
 				$hiragana = $('.hiragana'),
 				$joinButton = $('.join'),
-				$kana = $('.kana');
+				$kana = $('.kana'),
+				$kanaEnemy = $('.kanaEnemy');
 
 			$joinButton.on('click', function(){
 				typing.roomJoin();
 			});
 
-			var roomid,
-				userName;
-
 			var typing = {
+				roomid: '',
+				userName: '',
+				userNameEnemy: '',
 				roomJoin: function(){
 					const socket = io();
-					if(!userName){
+					if(!typing.userName){
 						userName = 'user' + Math.floor(Math.random() * 100);
 					}
 
 					socket.on('connected', function() {
 
 						//ルーム確認
-						socket.emit('join room', {'userName':userName});
+						socket.emit('join room', {'userName':typing.userName});
 
 						// ルームに同名ユーザー存在 再度生成
 						socket.on('userName exists', function () {
 							//userName = 'user' + Math.floor(Math.random() * 100);
 							socket.emit('get userName', {});
-							socket.emit('join room', {'userName':userName});
+							socket.emit('join room', {'userName':typing.userName});
 						});
 
 						socket.on('battle wait', function () {
@@ -44,12 +45,25 @@
 							$('.startWait').fadeIn();
 						});
 
-						socket.on('battle start', function () {
+						socket.on('battle start', function (data) {
+							if(data){
+				        		Object.keys(data).forEach(function (key) {
+				        			if(data[key] != typing.userName){
+										typing.userNameEnemy = data[key];
+									}
+								});
+								console.log(typing.userNameEnemy);
+							}
+
 							//$('.startWait').text('対戦相手が見つかりました');
 							$('.startWait').remove();
 							$joinButton.remove();
 							$Question.fadeIn();
 							typing.init();
+						});
+
+						socket.on('clear text', function (){
+							typing.clearText();
 						});
 					});
 				},
@@ -89,6 +103,7 @@
 				typStart: '',
 				typEnd: '',	 //開始時と終了時の時刻を格納
 				hiraganaText: '',
+				hiraganaEnemyText: '',
 				questionText: '',
 				questionBox: [
 					'あああああ',
@@ -166,6 +181,7 @@
 					
 					typing.questionText = typing.questionBox[typing.qCnt];
 					typing.hiraganaText = typing.hiraToRoman(typing.questionText);
+					hiraganaEnemyText = typing.hiraganaText;
 					var splitText = typing.hiraganaText.toUpperCase().split('');
 
 					for ( var i = 0 ; i < splitText.length ; i++)
@@ -176,6 +192,14 @@
 					//問題枠に表示する
 					$hiragana.html(typing.questionText);
 					$kana.html(typing.hiraganaText);
+
+					$kanaEnemy.html(typing.hiraganaText);
+				},
+				clearText :function(){
+					//問題文の頭の一文字を切り取る
+					typing.hiraganaEnemyText = typing.hiraganaEnemyText.substring(1, typing.hiraganaEnemyText.Length);
+
+					$kanaEnemy.html(typing.hiraganaEnemyText);
 				},
 				//キー入力を受け取る関数
 				typeGame: function(evt)
@@ -206,6 +230,9 @@
 							typing.hiraganaText = typing.hiraganaText.substring(1, typing.hiraganaText.Length);
 
 							$kana.html(typing.hiraganaText);
+
+							//相手にタイプ情報送信
+							socket.emit('clear type', typing.userNameEnemy);
 						}else{
 							typing.qCnt++; //カウント数を+1
 
@@ -288,7 +315,8 @@
 	<body>
 		<div id="Question">
 	      <div class="hiragana"></div> 
-	      <div class="kana"></div>  
+	      <div class="kana"></div> 
+	      <div class="kanaEnemy" style="margin-top: 30px"></div>
 	    </div>
 
 		<p class="join">room join</p>

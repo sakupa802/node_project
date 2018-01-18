@@ -61,27 +61,33 @@ $(function(){
 				typing.rnd[i] = Math.floor( Math.random() * 26 );
 			}
 		},
+		battleData: {},
 		chat: function(){
 			socket.on('connected', function () {
-	            socket.emit('check credential', battleData);
+	            socket.emit('check credential', typing.battleData);
 	        });
 
 	        // 認証成功
 	        socket.on('credential ok', function (data) {
-	            battleData.roomId = data.roomId;
+	            typing.battleData.roomId = data.roomId;
 	        });
 
 	        // ルームに同名ユーザー存在 再度生成
 	        socket.on('userName exists', function () {
 	            battleData.userName = 'user' + Math.floor(Math.random() * 100);
-	            socket.emit('check credential', battleData);
+	            socket.emit('check credential', typing.battleData);
 	        });
 
 	        socket.on('battle wait', function () {
 	            battleCtrl.battleWait();
 	        });
 
-	        socket.on('battle start', function () {
+	        socket.on('battle start', function (data) {
+	        	
+	        		console.log(data);
+	        		console.log(typing.battleData.userName);
+	        	
+
 	            battleCtrl.battleStart();
 	        });
 
