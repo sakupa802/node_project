@@ -23,26 +23,29 @@
 				userName: '',
 				userNameEnemy: '',
 				roomJoin: function(){
+					console.log('click');
 					const socket = io();
 					if(!typing.userName){
 						userName = 'user' + Math.floor(Math.random() * 100);
 					}
 
 					socket.on('connected', function() {
-
 						//ルーム確認
 						socket.emit('join room', {'userName':typing.userName});
 
 						// ルームに同名ユーザー存在 再度生成
 						socket.on('userName exists', function () {
+							console.log('exists')
 							//userName = 'user' + Math.floor(Math.random() * 100);
 							socket.emit('get userName', {});
-							socket.emit('join room', {'userName':typing.userName});
+							//socket.emit('join room', {'userName':typing.userName});
+							return;
 						});
 
 						socket.on('battle wait', function () {
 							$('.startWait').text('対戦相手を探しています');
 							$('.startWait').fadeIn();
+							console.log('探しています')
 						});
 
 						socket.on('battle start', function (data) {

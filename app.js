@@ -46,10 +46,11 @@ http.listen(3000, function(){
 });
 
 
+
 /*------ sockets ------*/
-var userName = '',
-	enemyName = '',
+var userName,
 	joinCount = 0,// 参加人数
+	enemyID,// 参加人数
     roomCount = 1;// ルーム数
 
 // socket.ioのソケットを管理するオブジェクト
@@ -79,14 +80,16 @@ var room = io.sockets.on('connection', function (socket) {
             if (socketsOf[roomId][client.userName] !== undefined) {
                 joinCount -= 1;
                 socket.emit('userName exists', {});
-                return;
+                return false;
+            }else{
+            	// 相手のID取得
+            	enemyID = socketsOf[roomId];
             }
         }
 
 	    // ソケットにクライアントの情報をセット
 		socketsOf[roomId][client.userName] = this.id;
 
-		console.log(socketsOf);
 	    // 認証成功
 	    // socket.emit('join ok', {});
 
@@ -96,9 +99,11 @@ var room = io.sockets.on('connection', function (socket) {
 
 	    if (members.length === 1) {
 	        socket.emit('battle wait');
+	        console.log(socketsOf[roomId]);
 	    }else if(members.length === 2) {
 	        socket.broadcast.emit('battle start', members);
 	        socket.emit('battle start', members);
+	        console.log(socketsOf[roomId]);
 	    }
 
 	    socket.on('clear type', function(data){
